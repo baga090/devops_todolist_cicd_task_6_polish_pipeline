@@ -12,11 +12,11 @@ on:
       artifact_to_deploy:
         description: 'Choose which artifact from the matrix to deploy'
         required: true
-        default: 'ubuntu-latest-3.9'
+        default: 'ubuntu-22.04-3.9'
         type: choice
         options:
-          - ubuntu-latest-3.8
-          - ubuntu-latest-3.9
+          - ubuntu-22.04-3.8
+          - ubuntu-22.04-3.9
           - windows-latest-3.8
           - windows-latest-3.9
 
@@ -31,7 +31,7 @@ jobs:
   python-ci:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-22.04, windows-latest]
         python-version: ["3.8", "3.9"]
     runs-on: ${{ matrix.os }}
     defaults:
@@ -73,14 +73,14 @@ jobs:
           path: .
 
       - name: Upload helm artifacts
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'
+        if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.9'
         uses: actions/upload-artifact@v4
         with:
           name: helm-artifacts
           path: ${{ github.workspace }}/helm-charts
 
       - name: Upload kind cluster artifact
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'
+        if: matrix.os == 'ubuntu-22.04' && matrix.python-version == '3.9'
         uses: actions/upload-artifact@v4
         with:
           name: kind-cluster
@@ -92,7 +92,7 @@ jobs:
     if: github.ref_name == 'main' || github.event_name == 'workflow_dispatch'
     needs: python-ci
     env:
-      SELECTED_ARTIFACT: ${{ inputs.artifact_to_deploy || 'ubuntu-latest-3.9' }}
+      SELECTED_ARTIFACT: ${{ inputs.artifact_to_deploy || 'ubuntu-22.04-3.9' }}
     steps:
       - name: Download python artifacts
         uses: actions/download-artifact@v4
