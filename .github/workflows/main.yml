@@ -125,6 +125,10 @@ jobs:
           name: helm-artifacts
           path: .
 
+      - name: Update image repository in values
+        run: |
+          sed -E -i "s|[a-zA-Z0-9_-]+/todoapp|${{ secrets.DOCKERHUB_USERNAME || 'baga090' }}/todoapp|g" ./todoapp/values.yaml ./todoapp/values/stg.yaml
+
       - name: Set Up Helm
         uses: azure/setup-helm@v4.2.0
 
@@ -143,10 +147,18 @@ jobs:
           name: helm-package
           path: ./*.tgz
 
+      - name: Re-upload updated helm artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: helm-artifacts
+          path: .
+          overwrite: true
+
   deploy-helm-dev:
     name: Deploy helm to Development
     uses: ./.github/workflows/reusable-deployment.yml
     needs: [helm-ci, docker-ci]
+    secrets: inherit
     with:
       environment: development
       version: ${{ github.sha }}
@@ -155,6 +167,7 @@ jobs:
     name: Deploy helm to Staging
     uses: ./.github/workflows/reusable-deployment.yml
     needs: [deploy-helm-dev]
+    secrets: inherit
     with:
       environment: staging
       version: ${{ github.sha }}
